@@ -1,8 +1,6 @@
-// use std::fs::File;
-// use std::io::Read;
+// use std::fs::File; // use std::io::Read;
 // use tide::Request;
 // use tide::Response;
-
 // async fn send_file(req: Request<()>) -> tide::Result<Response> {
 //     let mut file = File::open("./somefile.txt")?;
 
@@ -26,13 +24,29 @@
 //     Ok(())
 // }
 
-fn main(){ 
-    let message: String = String::from("hello world");
-    
-    
-    let clojure = move || {
-        println!("{}", message);
-    };
+mod db;
+use crate::db::{create_new_book, delete_book, find_book, get_connection, Book};
 
-    clojure();
+#[async_std::main]
+async fn main() -> mongodb::error::Result<()> {
+    let uri = "mongodb://127.0.0.1:27017/?maxPoolSize=20&w=majority";
+
+    let client = get_connection(uri).await.unwrap();
+    let database = client.database("ivan");
+    let collection = database.collection::<Book>("books");
+    // let book = Book::default();
+
+    // match create_new_book(book, &collection).await {
+    //     Ok(()) => println!("New book created"),
+    //     Err(err) => eprintln!("ERROR: {}", err),
+    // }
+
+    let message = delete_book(
+        "fb121f45-c30c-401d-a386-ef396bf0f649",
+        &collection,
+    )
+    .await;
+    println!("{:#?}", message);
+
+    Ok(())
 }

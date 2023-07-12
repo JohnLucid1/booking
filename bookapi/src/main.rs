@@ -25,15 +25,17 @@
 // }
 
 mod db;
-use crate::db::{create_new_book, delete_book, find_book, get_connection, Book};
+mod models;
+// use crate::db::{create_new_book, delete_book, find_book, get_connection};
+// use crate::models::Book;
 
-#[async_std::main]
-async fn main() -> mongodb::error::Result<()> {
-    let uri = "mongodb://127.0.0.1:27017/?maxPoolSize=20&w=majority";
+// #[async_std::main]
+// async fn main() -> mongodb::error::Result<()> {
+//     let uri = "mongodb://127.0.0.1:27017/?maxPoolSize=20&w=majority";
 
-    let client = get_connection(uri).await.unwrap();
-    let database = client.database("ivan");
-    let collection = database.collection::<Book>("books");
+//     let client = get_connection(uri).await.unwrap();
+//     let database = client.database("ivan");
+//     let collection = database.collection::<Book>("books");
     // let book = Book::default();
 
     // match create_new_book(book, &collection).await {
@@ -41,12 +43,22 @@ async fn main() -> mongodb::error::Result<()> {
     //     Err(err) => eprintln!("ERROR: {}", err),
     // }
 
-    let message = delete_book(
-        "fb121f45-c30c-401d-a386-ef396bf0f649",
-        &collection,
-    )
-    .await;
-    println!("{:#?}", message);
+//     let message = delete_book(
+//         "fb121f45-c30c-401d-a386-ef396bf0f649",
+//         &collection,
+//     )
+//     .await;
+//     println!("{:#?}", message);
 
+//     Ok(())
+// }
+
+#[async_std::main]
+async fn main() -> tide::Result<()> {
+    let mut app = tide::new();
+
+    app.at("/").get(|_| async { Ok("Hello world") });
+
+    app.listen("0.0.0.0:8080").await?;
     Ok(())
 }

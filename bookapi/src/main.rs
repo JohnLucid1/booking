@@ -24,7 +24,13 @@
 //     Ok(())
 // }
 
+use core::panic;
+use std::env::args;
+
+use crate::files::get_file_info;
+
 mod db;
+mod files;
 mod models;
 // use crate::db::{create_new_book, delete_book, find_book, get_connection};
 // use crate::models::Book;
@@ -36,12 +42,12 @@ mod models;
 //     let client = get_connection(uri).await.unwrap();
 //     let database = client.database("ivan");
 //     let collection = database.collection::<Book>("books");
-    // let book = Book::default();
+// let book = Book::default();
 
-    // match create_new_book(book, &collection).await {
-    //     Ok(()) => println!("New book created"),
-    //     Err(err) => eprintln!("ERROR: {}", err),
-    // }
+// match create_new_book(book, &collection).await {
+//     Ok(()) => println!("New book created"),
+//     Err(err) => eprintln!("ERROR: {}", err),
+// }
 
 //     let message = delete_book(
 //         "fb121f45-c30c-401d-a386-ef396bf0f649",
@@ -53,12 +59,25 @@ mod models;
 //     Ok(())
 // }
 
+// DONE: make a function that loops through a dir of books and saves all info about them
+// TODO: ENV file with the directory of books 
+
 #[async_std::main]
 async fn main() -> tide::Result<()> {
-    let mut app = tide::new();
+    let args: Vec<String> = args().collect();
+    if args.len() != 2 {
+        panic!("Not enough arguments, enter directory of books")
+    }
 
-    app.at("/").get(|_| async { Ok("Hello world") });
+    let works_dir = args.get(1).expect("Not a working directory").to_string();
+    // let mut app = tide::new();
 
-    app.listen("0.0.0.0:8080").await?;
+    // app.at("/").get(|_| async { Ok("Hello world") });
+
+    // app.listen("0.0.0.0:8080").await?;
+
+    let anotha = get_file_info(works_dir).unwrap();
+    println!("{:#?}", anotha);
+
     Ok(())
 }

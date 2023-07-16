@@ -10,9 +10,6 @@ pub struct Book {
     pub path: String,
 }
 
-
-
-
 impl Default for Book {
     fn default() -> Self {
         Self {

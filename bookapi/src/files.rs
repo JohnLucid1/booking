@@ -1,13 +1,13 @@
 use epub::doc::EpubDoc;
 use std::{
     fs::{read_dir, File},
-    io::BufReader,
+    io::{BufReader, self},
     path::PathBuf,
     sync::{Arc, Mutex},
     thread,
 };
 
-use crate::models::Book;
+pub use crate::models::Book;
 
 impl Book {
     pub fn new_book(path: PathBuf) -> Book {
@@ -74,8 +74,18 @@ fn get_epub_key(doc: &EpubDoc<BufReader<File>>, sub: &str) -> String {
         .to_owned();
 }
 
-fn get_files(dir: &str) -> Result<Vec<PathBuf>, std::io::Error> {
+pub fn get_files(dir: &str) -> Result<Vec<PathBuf>, std::io::Error> {
     let res = read_dir(dir)?;
-    let entryes: Vec<PathBuf> = res.filter_map(|e| e.ok().map(|f| f.path())).collect();
-    Ok(entryes)
+    let entries: Result<Vec<_>, io::Error> = res 
+        .filter_map(|entry| {
+            if let Ok(entry) = entry {
+                let file_path = entry.path();
+                if file_path.is_file() && file_path.extension() == Some("epub".as_ref()){
+                    return Some(Ok(file_path));
+                }
+            }
+            None
+        })
+        .collect();
+    entries
 }

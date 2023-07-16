@@ -1,7 +1,8 @@
 use std::{error::Error, io::ErrorKind};
 
+use async_std::{io::Cursor, stream::StreamExt};
 use mongodb::{
-    bson::doc,
+    bson::{doc, from_document},
     options::{ClientOptions, ServerApi, ServerApiVersion},
     results::DeleteResult,
     Client, Collection,
@@ -19,6 +20,14 @@ pub async fn create_new_book(
     Ok(())
 }
 
+pub async fn create_new_books(
+    books: Vec<Book>,
+    collection: &Collection<Book>,
+) -> Result<(), mongodb::error::Error> {
+    collection.insert_many(books, None).await?;
+    Ok(())
+}
+
 pub async fn delete_book(
     book_id: &str,
     collection: &Collection<Book>,
@@ -29,7 +38,34 @@ pub async fn delete_book(
         Ok(message) => Ok(message),
         Err(err) => Err(err),
     }
-    // Ok(String::from("Successfully deleted book"))
+}
+
+pub async fn get_all_books(
+    collection: &Collection<Book>,
+) -> Result<Vec<Book>, mongodb::error::Error> {
+    let cursor = collection.find(None, None).await?;
+
+    let mut book_vec: Vec<Book> = Vec::new();
+    // for result in cursor.  {
+    //     if let Ok(document) = result {
+    //         let book:Book = from_document(document)?;
+    //         book_vec.push(book);
+    //     }
+    // }
+
+    // cursor.map(|result| {
+    //     if let Ok(document) = result {
+    //         let book:Book = from_document(document)?;
+    //         book_vec.push(book)
+    //     }
+    // });
+
+    cursor.map(|res| match res {
+        Ok(some) => book_vec.push(some),
+        Err(err) => eprintln!("ERROR: {err}"),
+    });
+
+    Ok(book_vec)
 }
 
 pub async fn find_book(
